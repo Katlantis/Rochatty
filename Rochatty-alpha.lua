@@ -469,7 +469,7 @@ local function listenForFilteredMessagesAndResend()
                 wait(Config.MessageDelay) -- Delay to avoid spamming the chat
             end
         end
-    end)
+    end)    
 end
 
 -- Function to handle blacklist commands, restricted to LocalPlayer
