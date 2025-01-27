@@ -408,7 +408,7 @@ end
 
 local function GetBypass(arg1)
     local Placeholder = ""
-    local bypassWords = {
+    local bypassWords = --[[{
         A = "Ạ", B = "Ḃ", C = "C", D = "D́", E = "E", F = "Ḟ", G = "Ġ", H = "Ḣ", 
         I = "I", J = "J́", K = "Ḱ", L = "Ĺ", M = "M", N = "N", O = "O", P = "Ṕ", 
         Q = "Q́", R = "Ŕ", S = "Ṣ", T = "T", U = "Ụ", V = "V̇", W = "Ẃ", X = "X́", 
@@ -418,8 +418,8 @@ local function GetBypass(arg1)
         q = "q́", r = "ŕ", s = "ś", t = "t̋", u = "ū", v = "v̇", w = "ẃ", x = "x́", 
         y = "ý", z = "ź", 
         [" "] = " " -- Keep spaces as they are
-    }
-    --[[{
+    }]]
+    {
         A = "Ạ̲", B = "Ḅ̲", C = "С̲", D = "Ḍ̲", E = "Ẹ̲", F = "F̲", G = "Ɡ̲", H = "Ḥ̲", 
         I = "Ị̲", J = "Ј̲", K = "Ḳ̲", L = "Ḷ̲", M = "Ṃ̲", N = "Ṇ̲", O = "Ọ̲", P = "Р̲", 
         Q = "Q̲", R = "Ṛ̲", S = "Ṣ̲", T = "Ṭ̲", U = "Ụ̲", V = "Ṿ̲", W = "Ẉ̲", X = "Х̲", 
@@ -429,7 +429,7 @@ local function GetBypass(arg1)
         q = "q̲", r = "ṛ̲", s = "ṣ̲", t = "ṭ̲", u = "ụ̲", v = "ṿ̲", w = "ẉ̲", x = "х̲", 
         y = "ỵ̲", z = "ẓ̲", 
         [" "] = " " -- Keep spaces as they are
-    }]]
+    }
 
     for i in arg1:gmatch(".") do
         Placeholder = Placeholder .. (bypassWords[i] or i)
