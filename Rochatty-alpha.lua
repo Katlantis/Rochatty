@@ -435,38 +435,47 @@ local function listenForFilteredMessagesAndQueue()
         local message = data.Text
         local sender = Players:GetPlayerByUserId(data.TextSource.UserId)
 
-        -- Ensure the message is sent by the LocalPlayer (AI output)
+        -- Ensure the message is sent by the LocalPlayer (AI output only)
         if sender ~= Players.LocalPlayer then
             return
         end
 
-        -- Check if the message was filtered
+        -- Check if the message is filtered (or appears as hashtags)
         if isFiltered(message) or message:match("^#+$") then
-            warn("Filtered AI message detected. Splitting and sending as a queue...")
-            NotificationLibrary:SendNotification("Filtering", "Detected filtered message, processing...", 3)
+            warn("Filtered AI message detected. Splitting and queuing...")
+
+            NotificationLibrary:SendNotification("Info", "Processing filtered message and sending as a queue...", 3)
 
             -- Split the filtered message into smaller parts
             local messageChunks = {}
-            local chunkSize = Config.ChatCharacterLimit // 2 -- Smaller size to reduce filtering risk
+            local chunkSize = math.floor(Config.ChatCharacterLimit / 2) -- Smaller chunks for safety
             for i = 1, #message, chunkSize do
                 table.insert(messageChunks, message:sub(i, i + chunkSize - 1))
             end
 
-            -- Send the chunks as a queue
-            for _, chunk in ipairs(messageChunks) do
-                if isFiltered(chunk) then
-                    -- Apply bypassing logic if the chunk is still filtered
-                    local bypassedChunk = GetBypass(chunk)
-                    sendChatMessage(bypassedChunk)
-                else
-                    -- Send the unfiltered chunk
-                    sendChatMessage(chunk)
+            -- Function to process each chunk sequentially with delay
+            local function sendChunksWithDelay()
+                for index, chunk in ipairs(messageChunks) do
+                    wait(Config.MessageDelay) -- Delay between sending chunks
+
+                    if isFiltered(chunk) then
+                        -- Apply bypass logic if chunk is still filtered
+                        local bypassedChunk = GetBypass(chunk)
+                        warn(string.format("Sending bypassed chunk %d/%d: %s", index, #messageChunks, bypassedChunk))
+                        sendChatMessage(bypassedChunk)
+                    else
+                        -- Send the unfiltered chunk
+                        warn(string.format("Sending unfiltered chunk %d/%d: %s", index, #messageChunks, chunk))
+                        sendChatMessage(chunk)
+                    end
                 end
-                wait(Config.MessageDelay) -- Delay to avoid spamming
             end
 
+            -- Process the message chunks
+            sendChunksWithDelay()
+
             -- Notify completion
-            NotificationLibrary:SendNotification("Complete", "Filtered message sent successfully!", 3)
+            NotificationLibrary:SendNotification("Success", "Filtered message was successfully split and sent.", 3)
         end
     end)
 end
