@@ -406,7 +406,7 @@ local function listenForMessages()
     end)
 end
 
---[[local function GetBypass(arg1)
+local function GetBypass(arg1)
     local Placeholder = ""
     local bypassWords = {
         A = "Ạ", B = "Ḃ", C = "C", D = "D́", E = "E", F = "Ḟ", G = "Ġ", H = "Ḣ", 
@@ -419,7 +419,7 @@ end
         y = "ý", z = "ź", 
         [" "] = " " -- Keep spaces as they are
     }
-    {
+    --[[{
         A = "Ạ̲", B = "Ḅ̲", C = "С̲", D = "Ḍ̲", E = "Ẹ̲", F = "F̲", G = "Ɡ̲", H = "Ḥ̲", 
         I = "Ị̲", J = "Ј̲", K = "Ḳ̲", L = "Ḷ̲", M = "Ṃ̲", N = "Ṇ̲", O = "Ọ̲", P = "Р̲", 
         Q = "Q̲", R = "Ṛ̲", S = "Ṣ̲", T = "Ṭ̲", U = "Ụ̲", V = "Ṿ̲", W = "Ẉ̲", X = "Х̲", 
@@ -429,33 +429,41 @@ end
         q = "q̲", r = "ṛ̲", s = "ṣ̲", t = "ṭ̲", u = "ụ̲", v = "ṿ̲", w = "ẉ̲", x = "х̲", 
         y = "ỵ̲", z = "ẓ̲", 
         [" "] = " " -- Keep spaces as they are
-    }
+    }]]
 
     for i in arg1:gmatch(".") do
         Placeholder = Placeholder .. (bypassWords[i] or i)
     end
     return Placeholder
-end]]
+end
 
 -- Cache to track processed messages to avoid loops
 local processedMessages = {}
 
--- Recursive function to handle filtering and splitting of text
+-- Recursive function to handle filtering, bypassing, and splitting of text
 local function processFilteredChunk(chunk)
     -- Base case: Skip if the chunk is too small to process further
     if #chunk <= 1 then
-        if Config.Debug then
-            warn("Chunk is too small to process further. Skipping: " .. chunk)
-        end
+        warn("Chunk is too small to process further. Skipping: " .. chunk)
         return false
     end
 
     -- Check if the chunk is filtered
     if isFiltered(chunk) or chunk:match("^#+$") then
-        if Config.Debug then
-            warn("Chunk is filtered, splitting further: " .. chunk)
+        warn("Chunk is filtered. Attempting bypass: " .. chunk)
+
+        -- Attempt to bypass the chunk using the bypass function
+        local bypassedChunk = GetBypass(chunk)
+        if not isFiltered(bypassedChunk) and not bypassedChunk:match("^#+$") then
+            -- If the bypassed chunk is not filtered, send it
+            sendChatMessage(bypassedChunk)
+            processedMessages[bypassedChunk] = true
+            warn("Successfully sent bypassed chunk: " .. bypassedChunk)
+            return true
         end
-        -- Split the chunk into smaller parts
+
+        -- If bypassing fails, split the chunk into smaller parts
+        warn("Bypass failed. Splitting chunk further: " .. chunk)
         local subChunks = {}
         local halfLength = math.floor(#chunk / 2)
         table.insert(subChunks, chunk:sub(1, halfLength))
@@ -500,11 +508,11 @@ local function listenForFilteredMessagesAndQueue()
 
         -- Check if the message is filtered
         if isFiltered(message) or message:match("^#+$") then
-            warn("Filtered AI message detected. Splitting and queuing...")
+            warn("Filtered AI message detected. Splitting, bypassing, and queuing...")
 
             NotificationLibrary:SendNotification(
                 "Warning",
-                "Processing filtered message and sending as a queue...",
+                "Processing filtered message with bypass and sending as a queue...",
                 3
             )
 
