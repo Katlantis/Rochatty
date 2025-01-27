@@ -401,6 +401,26 @@ local function listenForMessages()
     end)
 end
 
+local function GetBypass(arg1)
+    local Placeholder = ""
+    local bypassWords = {
+        A = "Ạ", B = "Ḃ", C = "C", D = "D́", E = "E", F = "Ḟ", G = "Ġ", H = "Ḣ", 
+        I = "I", J = "J́", K = "Ḱ", L = "Ĺ", M = "M", N = "N", O = "O", P = "Ṕ", 
+        Q = "Q́", R = "Ŕ", S = "Ṣ", T = "T", U = "Ụ", V = "V̇", W = "Ẃ", X = "X́", 
+        Y = "Y", Z = "Z", 
+        a = "ạ", b = "ḃ", c = "ć", d = "d́", e = "ě", f = "ḟ", g = "ġ", h = "ḣ", 
+        i = "í", j = "j́", k = "ḱ", l = "l", m = "ṁ", n = "n̋", o = "ō", p = "ṕ", 
+        q = "q́", r = "ŕ", s = "ś", t = "t̋", u = "ū", v = "v̇", w = "ẃ", x = "x́", 
+        y = "ý", z = "ź", 
+        [" "] = " " -- Keep spaces as they are
+    }
+
+    for i in arg1:gmatch(".") do
+        Placeholder = Placeholder .. (bypassWords[i] or i)
+    end
+    return Placeholder
+end
+
 local function listenForFilteredMessagesAndResend()
     -- Listen for messages sent in the chat
     TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(data)
@@ -419,7 +439,7 @@ local function listenForFilteredMessagesAndResend()
             NotificationLibrary:SendNotification("Success", "Filtered message detected, bypassing and re-sending...", 3)
 
             -- Convert the filtered message into a bypassed version
-            local bypassedMessage = filterAndBypassChunk():GetBypassWords(message)
+            local bypassedMessage = GetBypass(message)
             -- Ensure that it doesn't exceed the chat character limit
             local bypassedChunks = filterAndBypassChunk(bypassedMessage)
 
