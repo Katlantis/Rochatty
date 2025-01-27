@@ -309,10 +309,10 @@ local function queryAI(prompt, senderName)
                 if audioUrl then
                     if Config.Debug then
                         print("-----------------------------------------------------------")
-                        print("MP3 audio URL:", audioUrl)
-                        NotificationLibrary:SendNotification("Success", "MP3 audio URL: "..audioUrl, 3)
                         print("Waiting for MP3 generation to complete...")
                         NotificationLibrary:SendNotification("Success", "Waiting for MP3 generation to complete...", 3)
+                        print("MP3 audio URL:", audioUrl)
+                        NotificationLibrary:SendNotification("Success", "MP3 audio URL: "..audioUrl, 3)
                         print("-----------------------------------------------------------")
                     end
                     wait(3) -- Adjust the wait time based on server speed
