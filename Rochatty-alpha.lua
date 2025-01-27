@@ -137,17 +137,17 @@ end
 local function filterAndBypassChunk(chunk)
     local function GetBypassWords(arg1)
         local Placeholder = ""
-        local bypassWords = {
-            A = "Ạ", B = "Ḃ", C = "C", D = "D́", E = "E", F = "Ḟ", G = "Ġ", H = "Ḣ", 
-            I = "I", J = "J́", K = "Ḱ", L = "Ĺ", M = "M", N = "N", O = "O", P = "Ṕ", 
-            Q = "Q́", R = "Ŕ", S = "Ṣ", T = "T", U = "Ụ", V = "V̇", W = "Ẃ", X = "X́", 
-            Y = "Y", Z = "Z", 
-            a = "ạ", b = "ḃ", c = "ć", d = "d́", e = "ě", f = "ḟ", g = "ġ", h = "ḣ", 
-            i = "í", j = "j́", k = "ḱ", l = "l", m = "ṁ", n = "n̋", o = "ō", p = "ṕ", 
-            q = "q́", r = "ŕ", s = "ś", t = "t̋", u = "ū", v = "v̇", w = "ẃ", x = "x́", 
-            y = "ý", z = "ź", 
-            [" "] = " " -- Keep spaces as they are
-        }
+    local bypassWords = {
+        A = "Ạ", B = "Ḃ", C = "C", D = "D́", E = "E", F = "Ḟ", G = "Ġ", H = "Ḣ", 
+        I = "I", J = "J́", K = "Ḱ", L = "Ĺ", M = "M", N = "N", O = "O", P = "Ṕ", 
+        Q = "Q́", R = "Ŕ", S = "Ṣ", T = "T", U = "Ụ", V = "V̇", W = "Ẃ", X = "X́", 
+        Y = "Y", Z = "Z", 
+        a = "ạ", b = "ḃ", c = "ć", d = "d́", e = "ě", f = "ḟ", g = "ġ", h = "ḣ", 
+        i = "í", j = "j́", k = "ḱ", l = "l", m = "ṁ", n = "n̋", o = "ō", p = "ṕ", 
+        q = "q́", r = "ŕ", s = "ś", t = "t̋", u = "ū", v = "v̇", w = "ẃ", x = "x́", 
+        y = "ý", z = "ź", 
+        [" "] = " " -- Keep spaces as they are
+    }
 
         for i in arg1:gmatch(".") do
             Placeholder = Placeholder .. (bypassWords[i] or i)
@@ -489,8 +489,6 @@ local function listenForFilteredMessagesAndQueue()
             return
         end
 
-        NotificationLibrary:SendNotification("Warning", "Processing filtered message and sending as a queue...", 3)
-
         -- Check if the message has already been processed
         if processedMessages[message] then
             if Config.Debug then
@@ -504,7 +502,7 @@ local function listenForFilteredMessagesAndQueue()
             warn("Filtered AI message detected. Splitting and queuing...")
 
             NotificationLibrary:SendNotification(
-                "Info",
+                "Warning",
                 "Processing filtered message and sending as a queue...",
                 3
             )
