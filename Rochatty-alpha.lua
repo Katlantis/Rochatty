@@ -427,8 +427,8 @@ local function listenForFilteredMessagesAndResend()
         local message = data.Text
         local sender = Players:GetPlayerByUserId(data.TextSource.UserId)
 
-        -- Ensure the message is sent by the LocalPlayer
-        if sender ~= Players.LocalPlayer then
+        -- Skip if the sender is the LocalPlayer (this avoids sending duplicate messages)
+        if sender == Players.LocalPlayer then
             return
         end
 
