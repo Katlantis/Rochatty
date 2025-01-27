@@ -129,8 +129,10 @@ local function isFiltered(text)
         -- Compare the filtered text with the original text
         return filteredText ~= text -- True if filtered, false otherwise
     else
-        warn("Error filtering text:", filteredText)
-        return false -- Assume it's not filtered if the check fails
+        if Config.Debug then
+            warn("Error filtering text:", filteredText)
+            return false -- Assume it's not filtered if the check fails
+        end
     end
 end
 
@@ -173,8 +175,10 @@ local function filterAndBypassChunk(chunk)
             return { bypassedChunk } -- Return a single chunk as a table
         end
     else
-        print("Unfiltered chunk: " .. chunk)
-        return { chunk } -- Return as a table for consistency
+        if Config.Debug then
+            print("Unfiltered chunk: " .. chunk)
+            return { chunk } -- Return as a table for consistency
+        end
     end
 end
 
