@@ -281,7 +281,7 @@ local function queryAI(prompt, senderName)
                 -- Debugging: Log the response structure
                 print("Raw Response:", response.Body) -- Log the raw response from the API
                 print(aiMessage) -- Log the clean response from the API
-                NotificationLibrary:SendNotification("Success", aiMessage, 3)
+                NotificationLibrary:SendNotification("Info", "AI: "..aiMessage, 3)
                 print("Parsed Response:", jsonResponse) -- Log the parsed response
                 print("-----------------------------------------------------------")
             end
@@ -391,7 +391,7 @@ local function listenForMessages()
                 print("AI query received from:", senderPlayer.Name.. ":")
                 print(prompt)
                 print("-----------------------------------------------------------")
-                NotificationLibrary:SendNotification("Success", "Got prompt from: "..senderPlayer.Name, 2)
+                NotificationLibrary:SendNotification("Info", "Got prompt from: "..senderPlayer.Name, 2)
             end 
             queryAI(prompt, senderPlayer.Name)
             
