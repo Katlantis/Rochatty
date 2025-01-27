@@ -95,14 +95,12 @@ end
 getgenv()["ScriptAlreadyLoaded"] = true
 
 -- Function to check if chat is using LegacyChatService
-local function isLegacyChat()
-    return TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService
-end
+local isLegacyChat = TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService
 
 -- Function to send chat messages
 local function sendChatMessage(message)
     if sendMessageEnabled then
-        if isLegacyChat() then
+        if isLegacyChat then
             game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(message, "All")
         else
             TextChatService.TextChannels.RBXGeneral:SendAsync(message)
