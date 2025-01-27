@@ -193,12 +193,6 @@ local function cleanAndSplitResponse(responseText)
     return chunks
 end
 
--- Function to send AI messages and track them
-local function sendAIMessage(message)
-    table.insert(AIGeneratedMessages, message) -- Track the message
-    sendChatMessage(message) -- Send the message to chat
-end
-
 -- Function to filter, bypass, and send response chunks
 local function sendResponseInChunks(chunks)
     for _, chunk in ipairs(chunks) do
@@ -206,7 +200,7 @@ local function sendResponseInChunks(chunks)
         local processedChunks = filterAndBypassChunk(chunk)
         -- Send each processed (or split) chunk to chat
         for _, processedChunk in ipairs(processedChunks) do
-            sendAIMessage(processedChunk)
+            sendChatMessage(processedChunk)
             wait(Config.MessageDelay) -- Delay between each message
         end
     end
