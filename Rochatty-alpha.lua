@@ -411,10 +411,10 @@ end
 local function GetBypass(arg1)
     local Placeholder = ""
     local bypassWords = {
-        A = "Ạ", B = "Ḃ", C = "C", D = "D́", E = "E", F = "Ḟ", G = "Ġ", H = "Ḣ", 
-        I = "I", J = "J́", K = "Ḱ", L = "Ĺ", M = "M", N = "N", O = "O", P = "Ṕ", 
-        Q = "Q́", R = "Ŕ", S = "Ṣ", T = "T", U = "Ụ", V = "V̇", W = "Ẃ", X = "X́", 
-        Y = "Y", Z = "Z", 
+        A = "Ạ̲", B = "Ḅ̲", C = "С̲", D = "Ḍ̲", E = "Ẹ̲", F = "F̲", G = "Ɡ̲", H = "Ḥ̲", 
+        I = "Ị̲", J = "Ј̲", K = "Ḳ̲", L = "Ḷ̲", M = "Ṃ̲", N = "Ṇ̲", O = "Ọ̲", P = "Р̲", 
+        Q = "Q̲", R = "Ṛ̲", S = "Ṣ̲", T = "Ṭ̲", U = "Ụ̲", V = "Ṿ̲", W = "Ẉ̲", X = "Х̲", 
+        Y = "Ỵ̲", Z = "Ẓ̲", 
         a = "ạ̲", b = "ḅ̲", c = "с̲", d = "ḍ̲", e = "ẹ̲", f = "f̲", g = "ɡ̲", h = "ḥ̲", 
         i = "ị̲", j = "ј̲", k = "ḳ̲", l = "ḷ̲", m = "ṃ̲", n = "ṇ̲", o = "ọ̲", p = "р̲", 
         q = "q̲", r = "ṛ̲", s = "ṣ̲", t = "ṭ̲", u = "ụ̲", v = "ṿ̲", w = "ẉ̲", x = "х̲", 
@@ -435,7 +435,7 @@ local function listenForFilteredMessagesAndResend()
         local sender = Players:GetPlayerByUserId(data.TextSource.UserId)
 
         -- Ensure the message is sent by the LocalPlayer
-        if sender ~= Players.LocalPlayer then
+        if sender ~= player then
             return
         end
 
