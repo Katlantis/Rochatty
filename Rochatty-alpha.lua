@@ -320,7 +320,7 @@ local function queryAI(prompt, senderName)
                 else
                     print("-----------------------------------------------------------")
                     warn("Failed to generate MP3 audio.")
-                    NotificationLibrary:SendNotification("Success", "Failed to generate MP3 audio.", 3)
+                    NotificationLibrary:SendNotification("Warning", "Failed to generate MP3 audio.", 3)
                     print("-----------------------------------------------------------")
                 end
             else
@@ -331,7 +331,7 @@ local function queryAI(prompt, senderName)
             if Config.Debug then
                 print("-----------------------------------------------------------")
                 warn("Unexpected response format: No valid content in response.")
-                NotificationLibrary:SendNotification("Success", "Unexpected response format: No valid content in response.", 3)
+                NotificationLibrary:SendNotification("Warning", "Unexpected response format: No valid content in response.", 3)
                 print("-----------------------------------------------------------")
             end
             return nil
@@ -341,7 +341,7 @@ local function queryAI(prompt, senderName)
             print("-----------------------------------------------------------")
             -- If the API request fails, log the error
             warn("API returned an error. Status Code:", response.StatusCode, "Message:", response.StatusMessage)
-            NotificationLibrary:SendNotification("Success", "API returned an error. Status Code:"..response.StatusCode, 3)
+            NotificationLibrary:SendNotification("error", "API returned an error. Status Code:"..response.StatusCode, 3)
             print("-----------------------------------------------------------")
         end
         return nil
@@ -458,7 +458,7 @@ local function handleBlacklistCommands()
                 NotificationLibrary:SendNotification("Success", targetPlayer.Name .. " has been blacklisted.", 3)
             else
                 sendChatMessage("Player " .. targetName .. " not found.")
-                NotificationLibrary:SendNotification("Success", "Player " .. targetName .. " not found.", 3)
+                NotificationLibrary:SendNotification("Warning", "Player " .. targetName .. " not found.", 3)
             end
         elseif message:sub(1, 12):lower() == ".unblacklist" or message:sub(1, 4):lower() == ".ubl" then
             local commandLength = message:sub(1, 12):lower() == ".unblacklist" and 14 or 6 -- Adjust for `.unblacklist` or `.ubl`
@@ -466,7 +466,7 @@ local function handleBlacklistCommands()
             local targetPlayer = Players:FindFirstChild(targetName)
             if Config.Debug then
                 print("Command received: " .. message)
-                NotificationLibrary:SendNotification("Success", "Command received: " .. message, 3)
+                NotificationLibrary:SendNotification("Info", "Command received: " .. message, 3)
                 print("Checking for .ubl match...")
             end
 
@@ -476,7 +476,7 @@ local function handleBlacklistCommands()
                 NotificationLibrary:SendNotification("Success", targetPlayer.Name .. " has been unblacklisted.", 3)
             else
                 sendChatMessage("Player " .. targetName .. " not found.")
-                NotificationLibrary:SendNotification("Success", "Player " .. targetName .. " not found.", 3)
+                NotificationLibrary:SendNotification("Warning", "Player " .. targetName .. " not found.", 3)
             end
         elseif message:sub(1, 8):lower() == ".getlist" then
             print("-----------------------------------------------------------")
