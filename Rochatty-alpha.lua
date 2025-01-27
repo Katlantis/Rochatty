@@ -324,6 +324,7 @@ local function queryAI(prompt, senderName)
                     print("-----------------------------------------------------------")
                 end
             else
+                NotificationLibrary:SendNotification("Info", "No MP3 found falling back", 3)
                 sendResponseInChunks(chunks) -- Fallback to text response only
             end
             return aiMessage
