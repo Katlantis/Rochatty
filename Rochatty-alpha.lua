@@ -40,6 +40,9 @@ end
 local sendMessageEnabled = Config.Autochat
 local prefix = Config.AITriggerPrefix
 
+-- Table to track AI-generated messages
+local AIGeneratedMessages = {}
+
 -- Blacklist table to store blacklisted players
 local Blacklist = {}
 
@@ -199,6 +202,12 @@ local function sendResponseInChunks(chunks)
             wait(Config.MessageDelay) -- Delay between each message
         end
     end
+end
+
+-- Function to send AI messages and track them
+local function sendAIMessage(message)
+    table.insert(AIGeneratedMessages, message) -- Track the message
+    sendChatMessage(message) -- Send the message to chat
 end
 
 local function queryAI(prompt, senderName)
@@ -408,10 +417,10 @@ local function GetBypass(arg1)
         I = "I", J = "J́", K = "Ḱ", L = "Ĺ", M = "M", N = "N", O = "O", P = "Ṕ", 
         Q = "Q́", R = "Ŕ", S = "Ṣ", T = "T", U = "Ụ", V = "V̇", W = "Ẃ", X = "X́", 
         Y = "Y", Z = "Z", 
-        a = "ạ", b = "ḃ", c = "ć", d = "d́", e = "ě", f = "ḟ", g = "ġ", h = "ḣ", 
-        i = "í", j = "j́", k = "ḱ", l = "l", m = "ṁ", n = "n̋", o = "ō", p = "ṕ", 
-        q = "q́", r = "ŕ", s = "ś", t = "t̋", u = "ū", v = "v̇", w = "ẃ", x = "x́", 
-        y = "ý", z = "ź", 
+        a = "ạ̲", b = "ḅ̲", c = "с̲", d = "ḍ̲", e = "ẹ̲", f = "f̲", g = "ɡ̲", h = "ḥ̲", 
+        i = "ị̲", j = "ј̲", k = "ḳ̲", l = "ḷ̲", m = "ṃ̲", n = "ṇ̲", o = "ọ̲", p = "р̲", 
+        q = "q̲", r = "ṛ̲", s = "ṣ̲", t = "ṭ̲", u = "ụ̲", v = "ṿ̲", w = "ẉ̲", x = "х̲", 
+        y = "ỵ̲", z = "ẓ̲", 
         [" "] = " " -- Keep spaces as they are
     }
 
@@ -421,21 +430,35 @@ local function GetBypass(arg1)
     return Placeholder
 end
 
+-- Function to listen for filtered messages and resend only AI-generated ones
 local function listenForFilteredMessagesAndResend()
-    -- Listen for messages sent in the chat
     TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(data)
         local message = data.Text
         local sender = Players:GetPlayerByUserId(data.TextSource.UserId)
 
-        -- Skip if the sender is the LocalPlayer (this avoids sending duplicate messages)
-        if sender == Players.LocalPlayer then
+        -- Ensure the message is sent by the LocalPlayer
+        if sender ~= Players.LocalPlayer then
+            return
+        end
+
+        -- Check if the message matches an AI-generated message
+        local isAIGenerated = false
+        for _, aiMessage in ipairs(AIGeneratedMessages) do
+            if aiMessage == message then
+                isAIGenerated = true
+                break
+            end
+        end
+
+        -- If the message isn't AI-generated, ignore it
+        if not isAIGenerated then
             return
         end
 
         -- Check if the message consists only of hashtags
         if message:match("^#+$") then -- Matches a string with only "#" characters
-            warn("Filtered message detected (hashtags), bypassing and re-sending...")
-            NotificationLibrary:SendNotification("Success", "Filtered message detected (hashtags), bypassing and re-sending...", 3)
+            warn("Filtered AI message detected (hashtags), bypassing and re-sending...")
+            NotificationLibrary:SendNotification("Success", "Filtered AI message detected (hashtags), bypassing and re-sending...", 3)
 
             -- Convert the filtered message into a bypassed version
             local bypassedMessage = GetBypass(message)
@@ -444,7 +467,7 @@ local function listenForFilteredMessagesAndResend()
 
             -- Send the bypassed message chunk(s)
             for _, chunk in ipairs(bypassedChunks) do
-                sendChatMessage(chunk)
+                sendAIMessage(chunk)
                 wait(Config.MessageDelay) -- Delay to avoid spamming the chat
             end
         end
