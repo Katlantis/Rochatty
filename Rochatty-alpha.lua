@@ -378,8 +378,10 @@ local function listenForMessages()
                 print("AI query received from:", senderPlayer.Name.. ":")
                 print(prompt)
                 print("-----------------------------------------------------------")
+                NotificationLibrary:SendNotification("Success", "Got prompt from: "..senderPlayer.Name, 2)
             end 
             queryAI(prompt, senderPlayer.Name)
+            
         end
     end)
 end
