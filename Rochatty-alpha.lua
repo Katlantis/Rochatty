@@ -452,8 +452,9 @@ local function processFilteredChunk(chunk)
 
     -- Check if the chunk is filtered
     if isFiltered(chunk) or chunk:match("^#+$") then
-        warn("Chunk is filtered, splitting further: " .. chunk)
-
+        if Config.Debug then
+            warn("Chunk is filtered, splitting further: " .. chunk)
+        end
         -- Split the chunk into smaller parts
         local subChunks = {}
         local halfLength = math.floor(#chunk / 2)
