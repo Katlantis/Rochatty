@@ -428,63 +428,45 @@ local function GetBypass(arg1)
     return Placeholder
 end
 
-
-local filtersInARow = 0 -- Track consecutive filtering attempts
-local maxRetryAttempts = 3 -- Maximum number of retries for filtered messages
-
 -- Function to listen for filtered messages and resend only AI-generated ones
-local function listenForFilteredMessagesAndResend()
+local function listenForFilteredMessagesAndQueue()
     -- Listen for messages sent in the chat
     TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(data)
         local message = data.Text
         local sender = Players:GetPlayerByUserId(data.TextSource.UserId)
 
-        -- Ensure the message is sent by the LocalPlayer
+        -- Ensure the message is sent by the LocalPlayer (AI output)
         if sender ~= Players.LocalPlayer then
             return
         end
 
-        -- Check if the message was filtered (hashtags or altered text)
+        -- Check if the message was filtered
         if isFiltered(message) or message:match("^#+$") then
-            warn("Filtered AI message detected, attempting to bypass...")
+            warn("Filtered AI message detected. Splitting and sending as a queue...")
+            NotificationLibrary:SendNotification("Filtering", "Detected filtered message, processing...", 3)
 
-            -- Retry logic for filtered messages
-            local messageBeforeFilter = message -- Store the original message
-            while filtersInARow < maxRetryAttempts do
-                filtersInARow += 1
+            -- Split the filtered message into smaller parts
+            local messageChunks = {}
+            local chunkSize = Config.ChatCharacterLimit // 2 -- Smaller size to reduce filtering risk
+            for i = 1, #message, chunkSize do
+                table.insert(messageChunks, message:sub(i, i + chunkSize - 1))
+            end
 
-                -- Notify the user about the resend attempt
-                NotificationLibrary:SendNotification("Retrying", "Attempting to resend filtered message...", 3)
-
-                -- Generate a bypassed version of the message
-                local bypassedMessage = GetBypass(messageBeforeFilter)
-
-                -- Ensure that it doesn't exceed the chat character limit
-                local bypassedChunks = filterAndBypassChunk(bypassedMessage)
-
-                -- Resend the bypassed message chunk(s)
-                for _, chunk in ipairs(bypassedChunks) do
+            -- Send the chunks as a queue
+            for _, chunk in ipairs(messageChunks) do
+                if isFiltered(chunk) then
+                    -- Apply bypassing logic if the chunk is still filtered
+                    local bypassedChunk = GetBypass(chunk)
+                    sendChatMessage(bypassedChunk)
+                else
+                    -- Send the unfiltered chunk
                     sendChatMessage(chunk)
-                    wait(Config.MessageDelay) -- Delay between chunks
                 end
-
-                -- Break the loop if the retry was successful
-                if not isFiltered(bypassedMessage) then
-                    filtersInARow = 0
-                    break
-                end
-
-                -- Add a delay between retries to reduce aggressiveness
-                wait(6)
+                wait(Config.MessageDelay) -- Delay to avoid spamming
             end
 
-            -- If all retries fail, log the failure
-            if filtersInARow >= maxRetryAttempts then
-                warn("Message failed to bypass the chat filter after multiple attempts.")
-                NotificationLibrary:SendNotification("Failure", "Unable to bypass the chat filter.", 3)
-            end
-
-            filtersInARow = 0 -- Reset the counter after retries
+            -- Notify completion
+            NotificationLibrary:SendNotification("Complete", "Filtered message sent successfully!", 3)
         end
     end)
 end
@@ -582,7 +564,7 @@ local function handleListCurrentPlayersCommand()
 end
 
 -- Start listening for filtered messages
-listenForFilteredMessagesAndResend()
+listenForFilteredMessagesAndQueue()
 
 -- Initialize the listener for listing current players
 handleListCurrentPlayersCommand()
