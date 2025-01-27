@@ -158,6 +158,7 @@ local function filterAndBypassChunk(chunk)
     if isFiltered(chunk) then
         local bypassedChunk = GetBypassWords(chunk)
         warn("Filtered chunk detected and bypassed: " .. bypassedChunk)
+        NotificationLibrary:SendNotification("Success", "Filtered chunk detected and bypassed: " .. bypassedChunk, 3)
 
         -- If the bypassed chunk exceeds the character limit, split it
         if #bypassedChunk > Config.ChatCharacterLimit then
