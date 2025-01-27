@@ -159,7 +159,7 @@ local function filterAndBypassChunk(chunk)
     if isFiltered(chunk) then
         local bypassedChunk = GetBypassWords(chunk)
         warn("Filtered chunk detected and bypassed: " .. bypassedChunk)
-        NotificationLibrary:SendNotification("Success", "Filtered chunk detected and bypassed: " .. bypassedChunk, 3)
+        NotificationLibrary:SendNotification("Success", "Filtered chunk detected and bypassed", 3)
 
         -- If the bypassed chunk exceeds the character limit, split it
         if #bypassedChunk > Config.ChatCharacterLimit then
@@ -441,7 +441,43 @@ end
 
 -- Cache to track processed messages to avoid loops
 local processedMessages = {}
--- Function to listen for filtered messages and resend only AI-generated ones
+
+-- Recursive function to handle filtering and splitting of text
+local function processFilteredChunk(chunk)
+    -- Base case: Skip if the chunk is too small to process further
+    if #chunk <= 1 then
+        warn("Chunk is too small to process further. Skipping: " .. chunk)
+        return false
+    end
+
+    -- Check if the chunk is filtered
+    if isFiltered(chunk) or chunk:match("^#+$") then
+        warn("Chunk is filtered, splitting further: " .. chunk)
+
+        -- Split the chunk into smaller parts
+        local subChunks = {}
+        local halfLength = math.floor(#chunk / 2)
+        table.insert(subChunks, chunk:sub(1, halfLength))
+        table.insert(subChunks, chunk:sub(halfLength + 1))
+
+        -- Process each sub-chunk recursively
+        for _, subChunk in ipairs(subChunks) do
+            if processFilteredChunk(subChunk) then
+                return true -- Stop if any sub-chunk is successfully sent
+            end
+        end
+
+        return false -- No part of the chunk could be sent successfully
+    else
+        -- Chunk is not filtered, send it
+        sendChatMessage(chunk)
+        processedMessages[chunk] = true
+        warn("Successfully sent unfiltered chunk: " .. chunk)
+        return true
+    end
+end
+
+-- Function to listen for filtered messages and queue processing
 local function listenForFilteredMessagesAndQueue()
     -- Listen for messages sent in the chat
     TextChatService.TextChannels.RBXGeneral.MessageReceived:Connect(function(data)
@@ -461,45 +497,43 @@ local function listenForFilteredMessagesAndQueue()
             return
         end
 
-        -- Check if the message is filtered (or appears as hashtags)
+        -- Check if the message is filtered
         if isFiltered(message) or message:match("^#+$") then
             warn("Filtered AI message detected. Splitting and queuing...")
 
-            -- Split the filtered message into smaller parts
-            local messageChunks = {}
-            local chunkSize = math.floor(Config.ChatCharacterLimit / 2) -- Smaller chunks for safety
+            NotificationLibrary:SendNotification(
+                "Info",
+                "Processing filtered message and sending as a queue...",
+                3
+            )
+
+            -- Initial splitting into manageable chunks
+            local initialChunks = {}
+            local chunkSize = math.floor(Config.ChatCharacterLimit / 2) -- Smaller initial chunks for safety
             for i = 1, #message, chunkSize do
-                table.insert(messageChunks, message:sub(i, i + chunkSize - 1))
+                table.insert(initialChunks, message:sub(i, i + chunkSize - 1))
             end
 
-            -- Process each chunk sequentially with delay
-            for index, chunk in ipairs(messageChunks) do
+            -- Process each chunk with delay
+            for _, chunk in ipairs(initialChunks) do
                 wait(Config.MessageDelay) -- Delay between sending chunks
 
-                if isFiltered(chunk) then
-                    -- Apply bypass logic if chunk is still filtered
-                    local bypassedChunk = GetBypass(chunk)
-                    warn(string.format("Sending bypassed chunk %d/%d: %s", index, #messageChunks, bypassedChunk))
-                    sendChatMessage(bypassedChunk)
-
-                    -- Mark the bypassed chunk as processed
-                    processedMessages[bypassedChunk] = true
-                else
-                    -- Send the unfiltered chunk
-                    warn(string.format("Sending unfiltered chunk %d/%d: %s", index, #messageChunks, chunk))
-                    sendChatMessage(chunk)
-
-                    -- Mark the chunk as processed
-                    processedMessages[chunk] = true
+                if not processFilteredChunk(chunk) then
+                    warn("Skipping chunk as all attempts failed: " .. chunk)
                 end
             end
 
             -- Mark the original message as processed
             processedMessages[message] = true
+        else
+            -- Message is not filtered, no action needed
+            processedMessages[message] = true
+            if Config.Debug then
+                print("Unfiltered message detected, no action required: " .. message)
+            end
         end
     end)
 end
-
 
 -- Function to handle blacklist commands, restricted to LocalPlayer
 local function handleBlacklistCommands()
