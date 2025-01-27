@@ -427,16 +427,15 @@ local function listenForFilteredMessagesAndResend()
         local message = data.Text
         local sender = Players:GetPlayerByUserId(data.TextSource.UserId)
 
-        -- Skip if the sender is the LocalPlayer (this avoids sending duplicate messages)
+        -- Ensure the message is sent by the LocalPlayer
         if sender ~= Players.LocalPlayer then
             return
         end
 
-        -- Check if the message was filtered
-        if isFiltered(message) then
-            -- The message is filtered, now we need to bypass it
-            warn("Filtered message detected, bypassing and re-sending...")
-            NotificationLibrary:SendNotification("Success", "Filtered message detected, bypassing and re-sending...", 3)
+        -- Check if the message consists only of hashtags
+        if message:match("^#+$") then -- Matches a string with only "#" characters
+            warn("Filtered message detected (hashtags), bypassing and re-sending...")
+            NotificationLibrary:SendNotification("Success", "Filtered message detected (hashtags), bypassing and re-sending...", 3)
 
             -- Convert the filtered message into a bypassed version
             local bypassedMessage = GetBypass(message)
