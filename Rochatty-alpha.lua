@@ -131,8 +131,8 @@ local function isFiltered(text)
     else
         if Config.Debug then
             warn("Error filtering text:", filteredText)
-            return false -- Assume it's not filtered if the check fails
         end
+        return false -- Assume it's not filtered if the check fails
     end
 end
 
@@ -177,8 +177,8 @@ local function filterAndBypassChunk(chunk)
     else
         if Config.Debug then
             print("Unfiltered chunk: " .. chunk)
-            return { chunk } -- Return as a table for consistency
         end
+        return { chunk } -- Return as a table for consistency
     end
 end
 
@@ -450,7 +450,9 @@ local processedMessages = {}
 local function processFilteredChunk(chunk)
     -- Base case: Skip if the chunk is too small to process further
     if #chunk <= 1 then
-        warn("Chunk is too small to process further. Skipping: " .. chunk)
+        if Config.Debug then
+            warn("Chunk is too small to process further. Skipping: " .. chunk)
+        end
         return false
     end
 
